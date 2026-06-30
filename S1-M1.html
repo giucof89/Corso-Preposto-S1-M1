@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S1-M1 -- Chi e il preposto nel sistema di prevenzione</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 16px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    width: 800px; max-width: 100%;
+    overflow: hidden;
+  }
+  .header {
+    background: #1F4E79;
+    color: #fff;
+    padding: 18px 24px 14px;
+  }
+  .header .badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    background: #2E74B5; display: inline-block;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .header h1 { font-size: 17px; line-height: 1.3; }
+  .header .sub { font-size: 12px; opacity: 0.75; margin-top: 4px; }
+  .progress-bar-wrap {
+    background: #E2EAF4; height: 6px;
+  }
+  .progress-bar {
+    background: #C05500; height: 6px;
+    transition: width 0.4s ease;
+  }
+  .body { padding: 28px 28px 20px; min-height: 380px; }
+  .q-counter {
+    font-size: 12px; color: #888; margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .q-text {
+    font-size: 15px; color: #1a1a1a; line-height: 1.55;
+    margin-bottom: 20px; font-weight: 600;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    background: #f5f7fa; border: 2px solid #d0d8e4;
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 14px; color: #333; text-align: left;
+    cursor: pointer; transition: all 0.2s; line-height: 1.4;
+  }
+  .opt-btn:hover:not(:disabled) {
+    background: #e8f0fc; border-color: #2E74B5;
+  }
+  .opt-btn.correct {
+    background: #e6f4ea; border-color: #34A853; color: #1a5c29;
+  }
+  .opt-btn.wrong {
+    background: #fce8e6; border-color: #EA4335; color: #7a1c14;
+  }
+  .opt-btn:disabled { cursor: default; }
+  .feedback {
+    margin-top: 16px; padding: 12px 16px;
+    border-radius: 8px; font-size: 13.5px; line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok {
+    background: #e6f4ea; border-left: 4px solid #34A853; color: #1a5c29;
+  }
+  .feedback.ko {
+    background: #fce8e6; border-left: 4px solid #EA4335; color: #7a1c14;
+  }
+  .footer {
+    padding: 14px 28px 22px;
+    display: flex; justify-content: flex-end;
+  }
+  .next-btn {
+    background: #1F4E79; color: #fff;
+    border: none; border-radius: 8px;
+    padding: 11px 28px; font-size: 14px; font-weight: 700;
+    cursor: pointer; display: none; transition: background 0.2s;
+  }
+  .next-btn:hover { background: #2E74B5; }
+  /* RISULTATO FINALE */
+  .result-screen {
+    padding: 36px 28px 32px; text-align: center; display: none;
+  }
+  .result-screen .score-ring {
+    width: 110px; height: 110px; border-radius: 50%;
+    margin: 0 auto 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 800; color: #fff;
+  }
+  .ring-pass { background: #34A853; }
+  .ring-partial { background: #FBBC04; }
+  .ring-fail { background: #EA4335; }
+  .result-screen h2 { font-size: 20px; color: #1F4E79; margin-bottom: 8px; }
+  .result-screen p { font-size: 14px; color: #555; margin-bottom: 22px; }
+  .retry-btn {
+    background: #1F4E79; color: #fff;
+    border: none; border-radius: 8px;
+    padding: 11px 32px; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+  }
+  .retry-btn:hover { background: #2E74B5; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="badge">S1-M1 &nbsp;|&nbsp; Modulo 1.1</div>
+    <h1>Chi e il preposto nel sistema di prevenzione</h1>
+    <div class="sub">Sezione 1 - Ruolo, obblighi e responsabilita</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="pbar" style="width:0%"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-area">
+    <div class="body">
+      <div class="q-counter" id="qcount"></div>
+      <div class="q-text" id="qtext"></div>
+      <div class="options" id="opts"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <div class="footer">
+      <button class="next-btn" id="nextbtn" onclick="next()">Prossima domanda &rarr;</button>
+    </div>
+  </div>
+
+  <!-- RISULTATO -->
+  <div class="result-screen" id="result-screen">
+    <div class="score-ring" id="score-ring"></div>
+    <h2 id="res-title"></h2>
+    <p id="res-msg"></p>
+    <button class="retry-btn" onclick="restart()">Riprova</button>
+  </div>
+</div>
+
+<script>
+const Q = [
+  {
+    "testo": "Mario coordina di fatto 5 colleghi in officina, assegna i lavori e verifica che vengano eseguiti correttamente. Non ha mai ricevuto una nomina scritta come preposto. Ha obblighi di preposto?",
+    "opzioni": [
+      "No, senza nomina scritta non ha nessun obbligo",
+      "Si, perche esercita di fatto poteri di coordinamento e vigilanza",
+      "Solo se il datore lo inserisce nel libro matricola come preposto",
+      "Solo per i colleghi che ha assunto personalmente"
+    ],
+    "corretta": 1,
+    "spiegazione": "La nomina di fatto scatta quando si svolgono concretamente funzioni di supervisione, indipendentemente da una nomina formale scritta."
+  },
+  {
+    "testo": "Nella gerarchia aziendale della sicurezza, come si posiziona il preposto?",
+    "opzioni": [
+      "Allo stesso livello del dirigente, con competenze diverse",
+      "Tra il dirigente e i lavoratori, come figura operativa di cerniera",
+      "Al di sotto dei lavoratori con piu anzianita",
+      "Fuori dalla catena gerarchica, con ruolo solo consultivo"
+    ],
+    "corretta": 1,
+    "spiegazione": "Il preposto e il collegamento operativo tra le decisioni del dirigente e il lavoro quotidiano dei lavoratori: coordina, vigila e segnala."
+  },
+  {
+    "testo": "Il datore di lavoro non ha ancora nominato formalmente un preposto nel reparto. Chi ha comunque obblighi di preposto?",
+    "opzioni": [
+      "Nessuno, finche non c'e nomina formale scritta",
+      "Il lavoratore piu anziano del reparto in automatico",
+      "Chiunque eserciti di fatto poteri di sovrintendenza e coordinamento sul gruppo",
+      "Solo il responsabile delle risorse umane"
+    ],
+    "corretta": 2,
+    "spiegazione": "Il D.Lgs. 81/08 si basa sulla sostanza, non solo sulla forma: chi esercita di fatto il ruolo di preposto ne assume anche gli obblighi."
+  }
+];
+const TOTAL = Q.length;
+let cur = 0, score = 0, answered = false;
+
+function render() {
+  if (cur >= TOTAL) { showResult(); return; }
+  answered = false;
+  const q = Q[cur];
+  document.getElementById('qcount').textContent = 'Domanda ' + (cur+1) + ' di ' + TOTAL;
+  document.getElementById('qtext').textContent = q.testo;
+  document.getElementById('pbar').style.width = (cur / TOTAL * 100) + '%';
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback'; fb.textContent = '';
+  document.getElementById('nextbtn').style.display = 'none';
+
+  const opts = document.getElementById('opts');
+  opts.innerHTML = '';
+  q.opzioni.forEach(function(txt, i) {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = String.fromCharCode(97+i) + ')  ' + txt;
+    btn.onclick = function() { answer(i); };
+    opts.appendChild(btn);
+  });
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = Q[cur];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(function(b) { b.disabled = true; });
+  const fb = document.getElementById('feedback');
+  if (idx === q.corretta) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.textContent = 'Corretto! ' + q.spiegazione;
+    fb.className = 'feedback ok show';
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.corretta].classList.add('correct');
+    fb.textContent = 'Risposta errata. Corretta: ' + String.fromCharCode(97+q.corretta) + '. ' + q.spiegazione;
+    fb.className = 'feedback ko show';
+  }
+  const nb = document.getElementById('nextbtn');
+  nb.style.display = 'inline-block';
+  nb.textContent = cur < TOTAL-1 ? 'Prossima domanda →' : 'Vedi risultato →';
+}
+
+function next() { cur++; render(); }
+
+function showResult() {
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('pbar').style.width = '100%';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  const ring = document.getElementById('score-ring');
+  ring.textContent = score + '/' + TOTAL;
+  let cls, title, msg;
+  if (score === TOTAL) {
+    cls='ring-pass'; title='Ottimo!'; msg='Hai risposto correttamente a tutte le domande.';
+  } else if (score >= Math.ceil(TOTAL*0.6)) {
+    cls='ring-partial'; title='Buono!'; msg='Hai risposto correttamente a ' + score + ' domande su ' + TOTAL + '. Ripasssa i punti in cui hai sbagliato.';
+  } else {
+    cls='ring-fail'; title='Da rivedere'; msg='Hai risposto correttamente a ' + score + ' domande su ' + TOTAL + '. Ti consigliamo di ripassare il modulo.';
+  }
+  ring.className = 'score-ring ' + cls;
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-msg').textContent = msg;
+}
+
+function restart() {
+  cur=0; score=0; answered=false;
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('quiz-area').style.display='block';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
